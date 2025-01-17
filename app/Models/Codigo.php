@@ -9,6 +9,6 @@ class Codigo extends Model
 {
     use HasFactory;
 
-    protected $fillable = [ 'link','codigo_qr' ];
+    protected $fillable = [ 'url','codigo_qr','active' ];
 
 }

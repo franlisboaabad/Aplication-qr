@@ -332,6 +332,11 @@ return [
             'icon'        => 'fa fa-file',
         ],
         [
+            'text'        => 'Listado de QR',
+            'route'         => 'codigos.index',
+            'icon'        => 'fa fa-file',
+        ],
+        [
             'text'        => 'Generar QR',
             'route'         => 'menus.generar-qr',
             'icon'        => 'fa fa-cube',
@@ -341,9 +346,9 @@ return [
             'route'         => 'users.index',
             'icon'        => 'fa fa-users',
         ],
-       
 
-        
+
+
     ],
 
     /*

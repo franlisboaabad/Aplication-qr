@@ -119,9 +119,9 @@ class MenuController extends Controller
         }
 
         // Actualizar el nombre de la empresa solo si ha cambiado
-        $menu->update($request->all() + ['slug' => Str::slug($request->nombre_empresa)] );
+        $menu->update($request->all() + ['slug' => Str::slug($request->nombre_empresa)]);
 
-        
+
         // if ($menu->nombre_empresa !== $request->input('nombre_empresa')) {
         //     $menu->nombre_empresa = $request->input('nombre_empresa');
         // }
@@ -161,6 +161,18 @@ class MenuController extends Controller
 
     public function generar_qr_carta(Request $request)
     {
+        // // Obtener el valor del input enviado mediante AJAX
+        // $url = $request->input('url');
+
+        // // Generar el código QR utilizando SimpleSoftwareIO\QrCode
+        // $qrCode = QrCode::size(300)
+        //     ->style('square')
+        //     ->generate($url);
+
+        // // Devolver el código QR como una respuesta de tipo imagen/png
+        // return response($qrCode)->header('Content-Type', 'image/png');
+
+
         // Obtener el valor del input enviado mediante AJAX
         $url = $request->input('url');
 
@@ -169,8 +181,30 @@ class MenuController extends Controller
             ->style('square')
             ->generate($url);
 
-        // Devolver el código QR como una respuesta de tipo imagen/png
-        return response($qrCode)->header('Content-Type', 'image/png');
+        // Definir la ruta donde se guardará la imagen
+        $path = public_path('images/qrcodes/'); // Carpeta 'images/qrcodes' dentro de 'public'
+
+        // Asegurarse de que la carpeta exista, si no, crearla
+        if (!file_exists($path)) {
+            mkdir($path, 0777, true); // Crear la carpeta y sus subcarpetas si no existen
+        }
+
+        // Definir el nombre del archivo, puede ser dinámico si lo deseas
+        $fileName = 'qr_code_' . time() . '.svg';
+
+        // Guardar el código QR como una imagen PNG
+        file_put_contents($path . $fileName, $qrCode);
+
+        // Devolver la imagen generada y también la información en JSON
+        $imageUrl = url('images/qrcodes/' . $fileName); // Obtener la URL pública del archivo
+
+
+        // Aquí retornamos dos cosas: la imagen y un mensaje JSON con los detalles
+        return response()->json([
+            'message' => 'Código QR guardado exitosamente',
+            'file' => $fileName,
+            'image_url' => $imageUrl
+        ]);
     }
 
 

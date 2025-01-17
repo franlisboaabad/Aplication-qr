@@ -14,7 +14,9 @@ class CodigoController extends Controller
      */
     public function index()
     {
-        //
+        $codigos = Codigo::orderBy('created_at', 'desc')->paginate(10); // Obtener 10 registros por página
+
+        return view('admin.codigos.index', compact('codigos'));
     }
 
 
@@ -26,27 +28,24 @@ class CodigoController extends Controller
 
     public function store(Request $request)
     {
-        try {
-            // Validar los datos recibidos
-            $request->validate([
-                'url' => 'required|url',
-                'codigo_qr' => 'required'
-            ]);
+        // Validar los datos
+        $request->validate([
+            'url' => 'required|url',
+            'codigo_qr' => 'required|url',  // Asegurarse que la URL del código QR sea válida
+        ]);
 
-            // Crear un nuevo registro de código QR en la base de datos
-            $codigo = new Codigo();
-            $codigo->link = $request->input('url');
-            $codigo->codigo_qr = $request->input('codigo_qr'); // Guardar el QR en formato base64
-            $codigo->save();
+        // Obtener los datos del request
+        $url = $request->input('url');
+        $codigoQrUrl = $request->input('codigo_qr');  // La URL de la imagen generada
 
-            return response()->json(['message' => 'Código QR registrado exitosamente']);
-        } catch (\Exception $ex) {
-            // Capturar cualquier error y devolver un mensaje de error
-            return response()->json([
-                'error' => 'Hubo un error al registrar el código QR.',
-                'details' => $ex->getMessage() // Aquí puedes incluir el detalle del error si es necesario
-            ], 500); // Código 500 indica un error del servidor
-        }
+        // Guardar el código QR en la base de datos (por ejemplo, en un campo 'codigo_qr' de una tabla 'codigos')
+        $codigo = new Codigo; // Asegúrate de tener el modelo correspondiente
+        $codigo->url = $url; // Guardar el enlace
+        $codigo->codigo_qr = $codigoQrUrl;  // Guardar la URL de la imagen
+        $codigo->save();
+
+        // Responder con éxito
+        return response()->json(['message' => 'Código QR registrado exitosamente']);
     }
 
 
@@ -70,6 +69,11 @@ class CodigoController extends Controller
 
     public function destroy(Codigo $codigo)
     {
-        //
+        // Invertir el valor de 'active' (0 -> 1 o 1 -> 0)
+        $codigo->active = !$codigo->active;
+        $codigo->save();
+
+        // Regresar a la página anterior
+        return back();
     }
 }

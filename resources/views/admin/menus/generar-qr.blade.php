@@ -57,9 +57,23 @@
                         },
                         success: function(response) {
                             // Manejar la respuesta del controlador
-                            $("#codigoQRContainer").html(response);
-                            $('#btn_registrar').prop('disabled', false); // Habilitar el botón de registro
+                            // $("#codigoQRContainer").html(response.imagenUrl);
+                            // $('#btn_registrar').prop('disabled', false); // Habilitar el botón de registro
+                            // console.log(response);
 
+                            // Manejar la respuesta del controlador
+                            if (response.image_url) {
+                                // Crear la etiqueta <img> con la URL de la imagen
+                                var imgTag = '<img src="' + response.image_url + '" alt="Código QR generado" />';
+
+                                // Insertar la imagen dentro del contenedor con id 'codigoQRContainer'
+                                $("#codigoQRContainer").html(imgTag);
+                            }
+
+                            // Habilitar el botón de registro
+                            $('#btn_registrar').prop('disabled', false);
+
+                            // Opcional: Puedes hacer un log para ver la respuesta completa
                             console.log(response);
 
                         },
@@ -78,32 +92,37 @@
             // Registrar el QR en la base de datos cuando el usuario haga clic en el botón
             $('#btn_registrar').click(function(e) {
                 e.preventDefault();
-                var url = $("#link").val();
-                var codigo_qr = $('#codigoQRContainer').val();
+                var url = $("#link").val();  // Obtén el valor del link
+                var qrCodeSrc = $("#codigoQRContainer img").attr("src");  // La URL de la imagen del QR
 
-                console.log(codigo_qr);
+                console.log(qrCodeSrc);
 
+                if (url.length > 0 && qrCodeSrc.length > 0) {
+                    // Enviar los datos al backend (URL y ruta de la imagen del código QR)
+                    $.ajax({
+                        type: "POST",
+                        url: "/codigos",  // URL para registrar el código QR
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            url: url,
+                            codigo_qr: qrCodeSrc // Enviar la URL de la imagen del código QR
+                        },
+                        success: function(response) {
+                            alert('Código QR registrado exitosamente');
 
-                // if (url.length > 0 && qrCodeBase64.length > 0) {
-                //     $.ajax({
-                //         type: "POST",
-                //         url: "/codigos",
-                //         data: {
-                //             _token: "{{ csrf_token() }}",
-                //             url: url,
-                //             codigo_qr: qrCodeBase64 // Enviar el código QR generado
-                //         },
-                //         success: function(response) {
-                //             alert('Código QR registrado exitosamente');
-                //         },
-                //         error: function(xhr, status, error) {
-                //             console.error(error);
-                //             alert('Hubo un error al registrar el código QR');
-                //         }
-                //     });
-                // } else {
-                //     alert('Genera el código QR primero antes de registrar');
-                // }
+                            setTimeout(() => {
+                                location.reload();
+                            }, 1000);
+
+                        },
+                        error: function(xhr, status, error) {
+                            console.error(error);
+                            alert('Hubo un error al registrar el código QR');
+                        }
+                    });
+                } else {
+                    alert('Genera el código QR primero antes de registrar');
+                }
             });
 
         });

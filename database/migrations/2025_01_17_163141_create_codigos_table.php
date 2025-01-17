@@ -15,8 +15,9 @@ class CreateCodigosTable extends Migration
     {
         Schema::create('codigos', function (Blueprint $table) {
             $table->id();
-            $table->string('link');
+            $table->string('url');
             $table->text('codigo_qr');
+            $table->boolean('active')->default(1);
             $table->timestamps();
         });
     }
